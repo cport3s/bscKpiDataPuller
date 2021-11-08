@@ -1,0 +1,62 @@
+﻿#encoding=utf-8
+''' SiteDB BSC KPI Data Puller '''
+''' 2020-10-29: Initial release
+'''
+# ----------------------------------------------------------LIBRARIES---------------------------------------------------------- #
+
+# ----------------------------------------------------------VARIABLES---------------------------------------------------------- #
+bscServerIp = '172.16.121.41'
+dbUser = 'sitedb'
+dbPassword = 'BSCAltice.123'
+pfData = { 'assignmentNumber': '0', 'assignmentSuccessRate': '0', 'callSetupSuccessRate': '0', 'dropCallRate': '0','luUpdateRequests': '0', 'luUpdateSuccessRate': '0', 'gprsDLSetupSuccessRate': '0', 'gprsULSetupSuccessRate': '0', 'gprsDLDropCallRate': '0', 'gprsULDropCallRate': '0', 'edgeDLSetupSuccessRate': '0', 'edgeULSetupSuccessRate': '0', 'edgeDLDropCallRate': '0', 'edgeULDropCallRate': '0' }
+# ----------------------------------------------------------FUNCTIONS---------------------------------------------------------- #
+def performanceDataPopulator(currentNE, assignmentNumber, assignmentSuccessRate, callSetupSuccessRate, dropCallRate, luUpdateRequests, luUpdateSuccessRate, gprsDLSetupSuccessRate, gprsULSetupSuccessRate, gprsDLDropCallRate, gprsULDropCallRate, edgeDLSetupSuccessRate, edgeULSetupSuccessRate, edgeDLDropCallRate, edgeULDropCallRate)
+    ClearMMLBuffer()
+    # Determine the SSH connection status. 
+    Print(StrfTime("%Y%m%d:%H%M%S:") + 'Connected! Populating Site ' + currentNE)
+    query = "INSERT INTO `ran_pf_data`.`bsc_performance_data`(`nename`,`assignmentnumber`,`assignmentsuccessrate`,`cssr`,`dcr`,`luupdaterequests`,`luupdatesr`,`gprsdlssr`,`gprsulssr`,`gprdldcr`,`gprsuldcr`,`edgedlssr`,`edgeulssr`,`edgedldcr`,`edgeuldcr`) VALUES ('" + currentNE + "', " + assignmentNumber + ", " + assignmentSuccessRate + ", " + callSetupSuccessRate + ", " + dropCallRate + ", " + luUpdateRequests + ", " + luUpdateSuccessRate + ", " + gprsDLSetupSuccessRate + ", " + gprsULSetupSuccessRate + ", " + gprsDLDropCallRate + ", " + gprsULDropCallRate + ", " + edgeDLSetupSuccessRate + ", " + edgeULSetupSuccessRate + ", " + edgeDLDropCallRate + ", " + edgeULDropCallRate + ");"
+    ExecuteCmd(ssh, query)
+    Print(StrfTime("%Y%m%d:%H%M%S:") + query)
+end
+# -----------------------------------------------------------MAINCODE---------------------------------------------------------- #
+# Get NE list by type
+NEList = GetNELstByType('BSC6910 GSM')
+NEList.sort()
+# Open the connection
+ssh = OpenSSH(bscServerIp, dbUser, dbPassword)
+if IsConnected(ssh)
+    Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection success\n')
+    # Connect to the DB
+    ExecuteCmd(ssh, 'mysql -u ' + dbUser + ' -p' + dbPassword + ' ran_pf_data')
+    # Loop through the NE list
+    for currentNE in NEList
+        if (GetNEStatus(currentNE) == 1)
+            ConnectNE(currentNE)
+            @DSP GKPI:;
+            gKpiParsed = ParseMMLRpt(GetMMLReport(0))
+            assignmentNumber = GetAttrValueByName(gKpiParsed, 0, 'Number of Assignment Requests', 0)
+            assignmentSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Assignment Success Rate', 0)[:-1]
+            callSetupSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Call Setup Success Rate', 0)[:-1]
+            dropCallRate = GetAttrValueByName(gKpiParsed, 0, 'TCH Call Drop Rate', 0)[:-1]
+            luUpdateRequests = GetAttrValueByName(gKpiParsed, 0, 'Number of Location Update Requests', 0)[:-1]
+            luUpdateSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Location Update Success Rate', 0)[:-1]
+            gprsDLSetupSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Downlink GPRS TBF Setup Success Rate', 0)[:-1]
+            gprsULSetupSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Uplink GPRS TBF Setup Success Rate', 0)[:-1]
+            gprsDLDropCallRate = GetAttrValueByName(gKpiParsed, 0, 'Downlink GPRS TBF Call Drop Rate', 0)[:-1]
+            gprsULDropCallRate = GetAttrValueByName(gKpiParsed, 0, 'Uplink GPRS TBF Call Drop Rate', 0)[:-1]
+            edgeDLSetupSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Downlink EGPRS TBF Setup Success Rate', 0)[:-1]
+            edgeULSetupSuccessRate = GetAttrValueByName(gKpiParsed, 0, 'Uplink EGPRS TBF Setup Success Rate', 0)[:-1]
+            edgeDLDropCallRate = GetAttrValueByName(gKpiParsed, 0, 'Downlink EGPRS TBF Call Drop Rate', 0)[:-1]
+            edgeULDropCallRate = GetAttrValueByName(gKpiParsed, 0, 'Uplink EGPRS TBF Call Drop Rate', 0)[:-1]
+            performanceDataPopulator(currentNE, assignmentNumber, assignmentSuccessRate, callSetupSuccessRate, dropCallRate, luUpdateRequests, luUpdateSuccessRate, gprsDLSetupSuccessRate, gprsULSetupSuccessRate, gprsDLDropCallRate, gprsULDropCallRate, edgeDLSetupSuccessRate, edgeULSetupSuccessRate, edgeDLDropCallRate, edgeULDropCallRate)
+        else
+            Print(StrfTime("%Y%m%d:%H%M%S:") + ne + " is offline.")
+        end
+    end
+else
+    Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection failed\n')
+end
+# Close the connection. 
+CloseSSH(ssh)
+Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection closed')
+Print("Finished!")
