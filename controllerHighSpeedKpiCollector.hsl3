@@ -1,0 +1,182 @@
+﻿#encoding=utf-8
+''' SiteDB BSC KPI Data Puller '''
+''' 2020-10-29: Initial release
+	2021-11-08: Update provisioning method
+'''
+# ----------------------------------------------------------LIBRARIES---------------------------------------------------------- #
+
+# ----------------------------------------------------------VARIABLES---------------------------------------------------------- #
+bscServerIp = '172.16.121.41'
+dbUser = 'sitedb'
+dbPassword = 'BSCAltice.123'
+# ----------------------------------------------------------FUNCTIONS---------------------------------------------------------- #
+def bscPerformanceDataPopulator(neNameList, assignmentNumberf, assignmentSuccessRatef, callSetupSuccessRatef, dropCallRatef, luUpdateRequestsf, luUpdateSuccessRatef, gprsDLSetupSuccessRatef, gprsULSetupSuccessRatef, gprsDLDropCallRatef, gprsULDropCallRatef, edgeDLSetupSuccessRatef, edgeULSetupSuccessRatef, edgeDLDropCallRatef, edgeULDropCallRatef)
+	query = "INSERT INTO `ran_pf_data`.`bsc_performance_data`(`nename`,`assignmentnumber`,`assignmentsuccessrate`,`cssr`,`dcr`,`luupdaterequests`,`luupdatesr`,`gprsdlssr`,`gprsulssr`,`gprdldcr`,`gprsuldcr`,`edgedlssr`,`edgeulssr`,`edgedldcr`,`edgeuldcr`) VALUES "
+	for i in range(len(neNameList))
+		bscName = ToString(neNameList[i])[1]
+		assignmentNumber = ToString(assignmentNumberf[i])[1]
+		assignmentSuccessRate = ToString(assignmentSuccessRatef[i])[1]
+		callSetupSuccessRate = ToString(callSetupSuccessRatef[i])[1]
+		dropCallRate = ToString(dropCallRatef[i])[1]
+		luUpdateRequests = ToString(luUpdateRequestsf[i])[1]
+		luUpdateSuccessRate = ToString(luUpdateSuccessRatef[i])[1]
+		gprsDLSetupSuccessRate = ToString(gprsDLSetupSuccessRatef[i])[1]
+		gprsULSetupSuccessRate = ToString(gprsULSetupSuccessRatef[i])[1]
+		gprsDLDropCallRate = ToString(gprsDLDropCallRatef[i])[1]
+		gprsULDropCallRate = ToString(gprsULDropCallRatef[i])[1]
+		edgeDLSetupSuccessRate = ToString(edgeDLSetupSuccessRatef[i])[1]
+		edgeULSetupSuccessRate = ToString(edgeULSetupSuccessRatef[i])[1]
+		edgeDLDropCallRate = ToString(edgeDLDropCallRatef[i])[1]
+		edgeULDropCallRate = ToString(edgeULDropCallRatef[i])[1]
+		query += "('" + bscName + "', " + assignmentNumber + ", " + assignmentSuccessRate + ", " + callSetupSuccessRate + ", " + dropCallRate + ", " + luUpdateRequests + ", " + luUpdateSuccessRate + ", " + gprsDLSetupSuccessRate + ", " + gprsULSetupSuccessRate + ", " + gprsDLDropCallRate + ", " + gprsULDropCallRate + ", " + edgeDLSetupSuccessRate + ", " + edgeULSetupSuccessRate + ", " + edgeDLDropCallRate + ", " + edgeULDropCallRate + ")"
+		if i < len(neNameList) - 1
+			query += ", "
+		else
+			# Close the query and execute on database
+            query += ";"
+            ExecuteCmd(ssh, query)
+            Print(StrfTime("%Y%m%d:%H%M%S:") + query)
+            # Restart the query string
+            query = "INSERT INTO `ran_pf_data`.`bsc_performance_data`(`nename`,`assignmentnumber`,`assignmentsuccessrate`,`cssr`,`dcr`,`luupdaterequests`,`luupdatesr`,`gprsdlssr`,`gprsulssr`,`gprdldcr`,`gprsuldcr`,`edgedlssr`,`edgeulssr`,`edgedldcr`,`edgeuldcr`) VALUES "
+		end
+	end
+end
+
+def rncPerformanceDataPopulator(neNameList, rrcConnectionSuccessRatef, csConnectionSuccessRatef, psRtSuccessRatef, psNonRtSuccessRatef, csTrafficf, r99DLTrafficf, r99ULTrafficf, hsdpaTrafficf, hsupaTrafficf, csDropCallRatef, psDropCallRatef, pagingSuccessRatef)
+	query = "INSERT INTO `ran_pf_data`.`rnc_performance_data`(`nename`,`rrcconnectionsuccessRate`,`csconnectionsuccessrate`,`psrtsuccessrate`,`psnonrtsuccessrate`,`cstraffic`,`r99dltraffic`,`r99ultraffic`,`hsdpatraffic`,`hsupatraffic`,`csdropcallrate`,`psdropcallrate`,`pagingsuccessrate`) VALUES "
+    for i in range(len(neNameList))
+		rncName = ToString(neNameList[i])[1]
+		rrcConnectionSuccessRate = ToString(rrcConnectionSuccessRatef[i])[1]
+		csConnectionSuccessRate = ToString(csConnectionSuccessRatef[i])[1]
+		psRtSuccessRate = ToString(psRtSuccessRatef[i])[1]
+		psNonRtSuccessRate = ToString(psNonRtSuccessRatef[i])[1]
+		csTraffic = ToString(csTrafficf[i])[1]
+		r99DLTraffic = ToString(r99DLTrafficf[i])[1]
+		r99ULTraffic = ToString(r99ULTrafficf[i])[1]
+		hsdpaTraffic = ToString(hsdpaTrafficf[i])[1]
+		hsupaTraffic = ToString(hsupaTrafficf[i])[1]
+		csDropCallRate = ToString(csDropCallRatef[i])[1]
+		psDropCallRate = ToString(psDropCallRatef[i])[1]
+		pagingSuccessRate = ToString(pagingSuccessRatef[i])[1]
+		query += "('" + rncName + "', " + rrcConnectionSuccessRate + ", " + csConnectionSuccessRate + ", " + psRtSuccessRate + ", " + psNonRtSuccessRate + ", " + csTraffic + ", " + r99DLTraffic + ", " + r99ULTraffic + ", " + hsdpaTraffic + ", " + hsupaTraffic + ", " + csDropCallRate + ", " + psDropCallRate + ", " + pagingSuccessRate + ");"
+		if i < len(neNameList) - 1
+			query += ", "
+		else
+			# Close the query and execute on database
+            query += ";"
+            ExecuteCmd(ssh, query)
+            Print(StrfTime("%Y%m%d:%H%M%S:") + query)
+            # Restart the query string
+            query = "INSERT INTO `ran_pf_data`.`rnc_performance_data`(`nename`,`rrcconnectionsuccessRate`,`csconnectionsuccessrate`,`psrtsuccessrate`,`psnonrtsuccessrate`,`cstraffic`,`r99dltraffic`,`r99ultraffic`,`hsdpatraffic`,`hsupatraffic`,`csdropcallrate`,`psdropcallrate`,`pagingsuccessrate`) VALUES "
+		end
+	end
+end
+# -----------------------------------------------------------MAINCODE---------------------------------------------------------- #
+# Open the connection
+ssh = OpenSSH(bscServerIp, dbUser, dbPassword)
+# Declare lists
+bscName = []
+assignmentNumber = []
+assignmentSuccessRate = []
+callSetupSuccessRate = []
+dropCallRate = []
+luUpdateRequests = []
+luUpdateSuccessRate = []
+gprsDLSetupSuccessRate = []
+gprsULSetupSuccessRate = []
+gprsDLDropCallRate = []
+gprsULDropCallRate = []
+edgeDLSetupSuccessRate = []
+edgeULSetupSuccessRate = []
+edgeDLDropCallRate = []
+edgeULDropCallRate = []
+rncName = []
+rrcConnectionSuccessRate = []
+csConnectionSuccessRate = []
+psRtSuccessRate = []
+psNonRtSuccessRate = []
+csTraffic = []
+r99DLTraffic = []
+r99ULTraffic = []
+hsdpaTraffic = []
+hsupaTraffic = []
+csDropCallRate = []
+psDropCallRate = []
+pagingSuccessRate = []
+
+if IsConnected(ssh)
+    Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection success\n')
+    # Connect to the DB
+    ExecuteCmd(ssh, 'mysql -u ' + dbUser + ' -p' + dbPassword + ' ran_pf_data')
+	# Get BSC NE list
+	NEList = GetNELstByType('BSC6910 GSM')
+	NEList.sort()
+    # Loop through the NE list
+    for currentNE in NEList
+        if GetNEStatus(currentNE) == 1
+            ConnectNE(currentNE)
+            @DSP GKPI:;
+            gKpiParsed = ParseMMLRpt(GetMMLReport(0))
+			bscName.append(currentNE)
+            assignmentNumber.append(GetAttrValueByName(gKpiParsed, 0, 'Number of Assignment Requests', 0))
+            assignmentSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Assignment Success Rate', 0)[:-1])
+            callSetupSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Call Setup Success Rate', 0)[:-1])
+            dropCallRate.append(GetAttrValueByName(gKpiParsed, 0, 'TCH Call Drop Rate', 0)[:-1])
+            luUpdateRequests.append(GetAttrValueByName(gKpiParsed, 0, 'Number of Location Update Requests', 0))
+            luUpdateSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Location Update Success Rate', 0)[:-1])
+            gprsDLSetupSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Downlink GPRS TBF Setup Success Rate', 0)[:-1])
+            gprsULSetupSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Uplink GPRS TBF Setup Success Rate', 0)[:-1])
+            gprsDLDropCallRate.append(GetAttrValueByName(gKpiParsed, 0, 'Downlink GPRS TBF Call Drop Rate', 0)[:-1])
+            gprsULDropCallRate.append(GetAttrValueByName(gKpiParsed, 0, 'Uplink GPRS TBF Call Drop Rate', 0)[:-1])
+            edgeDLSetupSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Downlink EGPRS TBF Setup Success Rate', 0)[:-1])
+            edgeULSetupSuccessRate.append(GetAttrValueByName(gKpiParsed, 0, 'Uplink EGPRS TBF Setup Success Rate', 0)[:-1])
+            edgeDLDropCallRate.append(GetAttrValueByName(gKpiParsed, 0, 'Downlink EGPRS TBF Call Drop Rate', 0)[:-1])
+            edgeULDropCallRate.append(GetAttrValueByName(gKpiParsed, 0, 'Uplink EGPRS TBF Call Drop Rate', 0)[:-1])            
+			ClearMMLBuffer()
+        else
+            Print(StrfTime("%Y%m%d:%H%M%S:") + currentNE + " is offline.")
+        end
+    end
+	# Call provisioning function for GSM KPI
+	bscPerformanceDataPopulator(bscName, assignmentNumber, assignmentSuccessRate, callSetupSuccessRate, dropCallRate, luUpdateRequests, luUpdateSuccessRate, gprsDLSetupSuccessRate, gprsULSetupSuccessRate, gprsDLDropCallRate, gprsULDropCallRate, edgeDLSetupSuccessRate, edgeULSetupSuccessRate, edgeDLDropCallRate, edgeULDropCallRate)
+	# Collect RNC statistics
+	# Get NE list by type
+	NEList = GetNELstByType('BSC6910 UMTS') + GetNELstByType('BSC6900 UMTS')
+	NEList.sort()
+	# Connect to the DB
+	ExecuteCmd(ssh, 'mysql -u ' + dbUser + ' -p' + dbPassword + ' ran_pf_data')
+	# Loop through the NE list
+	for currentNE in NEList
+		if GetNEStatus(currentNE) == 1
+			ConnectNE(currentNE)
+			@DSP UKPI:UKPITYPE=Iu-0&RNC-1&NODESHARE-0;
+			uKpiParsed = ParseMMLRpt(GetMMLReport(0))
+			# In some cases, the last char is removed to keep data as string or int
+			rncName.append(currentNE)
+			rrcConnectionSuccessRate.append(GetAttrValueByName(uKpiParsed, 0, 'RRC connection setup success rate', 0)[:-1])
+			csConnectionSuccessRate.append(GetAttrValueByName(uKpiParsed, 0, 'CS connection setup success rate', 0)[:-1])
+			psRtSuccessRate.append(GetAttrValueByName(uKpiParsed, 0, 'PS interactive service setup success rate', 0)[:-1])
+			psNonRtSuccessRate.append(GetAttrValueByName(uKpiParsed, 0, 'PS background service setup success rate', 0)[:-1])
+			csTraffic.append(GetAttrValueByName(uKpiParsed, 0, 'RNC CS Equivalent Erlang', 0))
+			r99DLTraffic.append(GetAttrValueByName(uKpiParsed, 0, 'RNC PS R99 downlink thoughtput', 0))
+			r99ULTraffic.append(GetAttrValueByName(uKpiParsed, 0, 'RNC PS R99 uplink thoughtput', 0))
+			hsdpaTraffic.append(GetAttrValueByName(uKpiParsed, 0, 'RNC PS HSDPA downlink thoughtput', 0))
+			hsupaTraffic.append(GetAttrValueByName(uKpiParsed, 0, 'RNC PS HSUPA uplink thoughtput', 0))
+			csDropCallRate.append(GetAttrValueByName(uKpiParsed, 0, 'CS service drop rate', 0)[:-1])
+			psDropCallRate.append(GetAttrValueByName(uKpiParsed, 0, 'PS service drop rate', 0)[:-1])
+			pagingSuccessRate.append(GetAttrValueByName(uKpiParsed, 0, 'Paging success rate', 0)[:-1])
+			ClearMMLBuffer()
+		else
+			Print(StrfTime("%Y%m%d:%H%M%S:") + currentNE + " is offline.")
+		end
+	end
+	# Call UMTS Provisioning funciton
+	rncPerformanceDataPopulator(rncName, rrcConnectionSuccessRate, csConnectionSuccessRate, psRtSuccessRate, psNonRtSuccessRate, csTraffic, r99DLTraffic, r99ULTraffic, hsdpaTraffic, hsupaTraffic, csDropCallRate, psDropCallRate, pagingSuccessRate)
+else
+    Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection failed\n')
+end
+
+# Close the connection. 
+CloseSSH(ssh)
+Print(StrfTime("%Y%m%d:%H%M%S:") + 'ssh connection closed')
+Print("Finished!")
