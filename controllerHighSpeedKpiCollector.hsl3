@@ -58,7 +58,7 @@ def rncPerformanceDataPopulator(neNameList, rrcConnectionSuccessRatef, csConnect
 		csDropCallRate = ToString(csDropCallRatef[i])[1]
 		psDropCallRate = ToString(psDropCallRatef[i])[1]
 		pagingSuccessRate = ToString(pagingSuccessRatef[i])[1]
-		query += "('" + rncName + "', " + rrcConnectionSuccessRate + ", " + csConnectionSuccessRate + ", " + psRtSuccessRate + ", " + psNonRtSuccessRate + ", " + csTraffic + ", " + r99DLTraffic + ", " + r99ULTraffic + ", " + hsdpaTraffic + ", " + hsupaTraffic + ", " + csDropCallRate + ", " + psDropCallRate + ", " + pagingSuccessRate + ");"
+		query += "('" + rncName + "', " + rrcConnectionSuccessRate + ", " + csConnectionSuccessRate + ", " + psRtSuccessRate + ", " + psNonRtSuccessRate + ", " + csTraffic + ", " + r99DLTraffic + ", " + r99ULTraffic + ", " + hsdpaTraffic + ", " + hsupaTraffic + ", " + csDropCallRate + ", " + psDropCallRate + ", " + pagingSuccessRate + ")"
 		if i < len(neNameList) - 1
 			query += ", "
 		else
@@ -143,8 +143,6 @@ if IsConnected(ssh)
 	# Get NE list by type
 	NEList = GetNELstByType('BSC6910 UMTS') + GetNELstByType('BSC6900 UMTS')
 	NEList.sort()
-	# Connect to the DB
-	ExecuteCmd(ssh, 'mysql -u ' + dbUser + ' -p' + dbPassword + ' ran_pf_data')
 	# Loop through the NE list
 	for currentNE in NEList
 		if GetNEStatus(currentNE) == 1
