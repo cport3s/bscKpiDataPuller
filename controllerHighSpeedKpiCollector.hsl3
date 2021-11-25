@@ -1,6 +1,6 @@
 ﻿#encoding=utf-8
-''' SiteDB BSC KPI Data Puller '''
-''' 2020-10-29: Initial release
+''' SiteDB BSC KPI Data Puller
+    2020-10-29: Initial release
 	2021-11-08: Update provisioning method
 '''
 # ----------------------------------------------------------LIBRARIES---------------------------------------------------------- #
